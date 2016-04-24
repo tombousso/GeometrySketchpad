@@ -339,7 +339,7 @@ function depends2i(dependsOn) {
 
 function exists(name, dependsOn) {
     var v = depends2i(dependsOn);
-    return objects.flat.some(function (o) {
+    return objects.get(name).some(function (o) {
         return JSON.stringify(depends2i(o.dependsOn)) == JSON.stringify(v);
     });
 }

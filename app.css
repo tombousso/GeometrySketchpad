@@ -1,0 +1,42 @@
+﻿body
+{
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 16px;
+    color: white;
+}
+
+#msg {
+    font-size: 20px;
+    padding: 5%;
+}
+
+#buttons > div {
+    display: none;
+    width: 100%;
+    background-color: green;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-bottom: 2.5%;
+    padding-top: 2.5%;
+    border-bottom: 3px solid red;
+    border-top: 3px solid red;
+}
+
+#sidebar {
+    position: absolute;
+    top: 0;
+    left: 80%;
+    width: 20%;
+    height: 100%;
+    background-color: black;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80%;
+    height: 100%;
+}

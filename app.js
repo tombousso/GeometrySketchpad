@@ -86,6 +86,14 @@ var PointBase = (function (_super) {
         var d = Math.sqrt(Math.pow(x - this.getX(), 2) + Math.pow(y - this.getY(), 2));
         return Math.max(d - 15, 0);
     };
+
+    PointBase.prototype.getSlopeX = function (p2) {
+        return (this.getY() - p2.getY()) / (this.getX() - p2.getX());
+    };
+
+    PointBase.prototype.getSlopeY = function (p2) {
+        return (this.getX() - p2.getX()) / (this.getY() - p2.getY());
+    };
     return PointBase;
 })(Base);
 
@@ -135,6 +143,18 @@ var SegmentBase = (function (_super) {
         return NaN;
     };
 
+    SegmentBase.prototype.getSlopeX = function () {
+        return NaN;
+    };
+
+    SegmentBase.prototype.getSlopeY = function () {
+        return NaN;
+    };
+
+    SegmentBase.prototype.vert = function () {
+        return Math.abs(this.getSlopeX()) > 1;
+    };
+
     SegmentBase.prototype.render = function () {
         ctx.strokeStyle = this.selected ? 'blue' : 'black';
         ctx.lineWidth = 2;
@@ -174,6 +194,14 @@ var Segment = (function (_super) {
     Segment.prototype.getY2 = function () {
         return this.p2.getY();
     };
+
+    Segment.prototype.getSlopeX = function () {
+        return this.p1.getSlopeX(this.p2);
+    };
+
+    Segment.prototype.getSlopeY = function () {
+        return this.p1.getSlopeY(this.p2);
+    };
     return Segment;
 })(SegmentBase);
 
@@ -184,18 +212,6 @@ var LineBase = (function (_super) {
         this.p1 = p1;
         this.dependsOn.push(p1);
     }
-    LineBase.prototype.getSlopeX = function () {
-        return NaN;
-    };
-
-    LineBase.prototype.getSlopeY = function () {
-        return NaN;
-    };
-
-    LineBase.prototype.vert = function () {
-        return Math.abs(this.getSlopeX()) > 1;
-    };
-
     LineBase.prototype.getX1 = function () {
         return this.vert() ? this.p1.getX() + this.getSlopeY() * (0 - this.p1.getY()) : 0;
     };
@@ -223,29 +239,29 @@ var Line = (function (_super) {
         this.dependsOn.push(p2);
     }
     Line.prototype.getSlopeX = function () {
-        return (this.p1.getY() - this.p2.getY()) / (this.p1.getX() - this.p2.getX());
+        return this.p1.getSlopeX(this.p2);
     };
 
     Line.prototype.getSlopeY = function () {
-        return (this.p1.getX() - this.p2.getX()) / (this.p1.getY() - this.p2.getY());
+        return this.p1.getSlopeY(this.p2);
     };
     return Line;
 })(LineBase);
 
 var Perp = (function (_super) {
     __extends(Perp, _super);
-    function Perp(p1, l1) {
+    function Perp(p1, s1) {
         _super.call(this, p1);
         this.p1 = p1;
-        this.l1 = l1;
-        this.dependsOn.push(l1);
+        this.s1 = s1;
+        this.dependsOn.push(s1);
     }
     Perp.prototype.getSlopeX = function () {
-        return -this.l1.getSlopeY();
+        return -this.s1.getSlopeY();
     };
 
     Perp.prototype.getSlopeY = function () {
-        return -this.l1.getSlopeX();
+        return -this.s1.getSlopeX();
     };
     return Perp;
 })(LineBase);
@@ -323,9 +339,12 @@ function remove(os) {
         objects.remove(o);
     });
     objects.flat.forEach(function (o) {
-        o.dependsOn.forEach(function (d) {
-            if (os.indexOf(d) != -1)
+        o.dependsOn.some(function (d) {
+            if (os.indexOf(d) != -1) {
                 toRemove.push(o);
+                return true;
+            }
+            return false;
         });
     });
     remove(toRemove);
@@ -450,14 +469,13 @@ window.onload = function () {
             render();
         }),
         new Button("perp", function () {
-            if (selected.flat.length == 2 && selected.get("PointBase").length == 1 && selected.get("Line").length == 1) {
+            if (selected.flat.length == 2 && selected.get("PointBase").length == 1 && selected.get("SegmentBase").length == 1)
                 return !exists("Perp", selected.flat);
-            }
             return false;
         }, function (e, k) {
             return k == "p";
         }, function () {
-            objects.add(new Perp(selected.get("PointBase")[0], selected.get("Line")[0]));
+            objects.add(new Perp(selected.get("PointBase")[0], selected.get("SegmentBase")[0]));
             render();
         })
     ];
@@ -496,13 +514,13 @@ document.addEventListener("keydown", function (e) {
     var code = typeof e.which === "number" ? e.which : e.keyCode;
     var key = String.fromCharCode(code);
     key = key.toLowerCase();
-    var act = false;
-    buttons.forEach(function (o) {
-        if (!act && o.valid() && o.hotkey(e, key)) {
+    buttons.some(function (o) {
+        if (o.valid() && o.hotkey(e, key)) {
             o.action();
             e.preventDefault();
-            act = true;
+            return true;
         }
+        return false;
     });
 }, false);
 

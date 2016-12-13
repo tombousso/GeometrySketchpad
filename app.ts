@@ -58,7 +58,7 @@ class Base {
     }
 }
 
-class PointBase extends Base{
+class PointBase extends Base {
     render() {
         ctx.fillStyle = this.selected ? 'red' : 'black';
         ctx.beginPath();
@@ -78,6 +78,14 @@ class PointBase extends Base{
     distanceFrom(x, y) {
         var d = Math.sqrt(Math.pow(x - this.getX(), 2) + Math.pow(y - this.getY(), 2));
         return Math.max(d - 15, 0);
+    }
+
+    getSlopeX(p2: PointBase) {
+        return (this.getY() - p2.getY()) / (this.getX() - p2.getX());
+    }
+
+    getSlopeY(p2: PointBase) {
+        return (this.getX() - p2.getX()) / (this.getY() - p2.getY());
     }
 }
 
@@ -119,6 +127,18 @@ class SegmentBase extends Base {
         return NaN;
     }
 
+    getSlopeX() {
+        return NaN;
+    }
+
+    getSlopeY() {
+        return NaN;
+    }
+
+    vert() {
+        return Math.abs(this.getSlopeX()) > 1;
+    }
+
     render() {
         ctx.strokeStyle = this.selected ? 'blue' : 'black';
         ctx.lineWidth = 2;
@@ -155,24 +175,20 @@ class Segment extends SegmentBase {
     getY2() {
         return this.p2.getY();
     }
+
+    getSlopeX() {
+        return this.p1.getSlopeX(this.p2);
+    }
+
+    getSlopeY() {
+        return this.p1.getSlopeY(this.p2);
+    }
 }
 
 class LineBase extends SegmentBase {
     constructor(public p1: PointBase) {
         super();
         this.dependsOn.push(p1);
-    }
-
-    getSlopeX() {
-        return NaN;
-    }
-
-    getSlopeY() {
-        return NaN;
-    }
-
-    vert() {
-        return Math.abs(this.getSlopeX()) > 1;
     }
 
     getX1() {
@@ -199,26 +215,26 @@ class Line extends LineBase {
     }
 
     getSlopeX() {
-        return (this.p1.getY() - this.p2.getY()) / (this.p1.getX() - this.p2.getX());
+        return this.p1.getSlopeX(this.p2);
     }
 
     getSlopeY() {
-        return (this.p1.getX() - this.p2.getX()) / (this.p1.getY() - this.p2.getY());
+        return this.p1.getSlopeY(this.p2);
     }
 }
 
 class Perp extends LineBase {
-    constructor(public p1: PointBase, public l1: Line) {
+    constructor(public p1: PointBase, public s1: SegmentBase) {
         super(p1);
-        this.dependsOn.push(l1);
+        this.dependsOn.push(s1);
     }
 
     getSlopeX() {
-        return -this.l1.getSlopeY();
+        return -this.s1.getSlopeY();
     }
 
     getSlopeY() {
-        return -this.l1.getSlopeX();
+        return -this.s1.getSlopeX();
     }
 }
 
@@ -292,9 +308,12 @@ function remove(os: Array<Base>) {
         objects.remove(o);
     });
     objects.flat.forEach(function (o: Base) {
-        o.dependsOn.forEach(function (d) {
-            if (os.indexOf(d) != -1)
+        o.dependsOn.some(function (d) {
+            if (os.indexOf(d) != -1) {
                 toRemove.push(o);
+                return true;
+            }
+            return false;
         });
     });
     remove(toRemove);
@@ -450,17 +469,15 @@ window.onload = function () {
         ),
         new Button("perp",
             function () {
-                if (selected.flat.length == 2 && selected.get("PointBase").length == 1 && selected.get("Line").length == 1)
-                {
+                if (selected.flat.length == 2 && selected.get("PointBase").length == 1 && selected.get("SegmentBase").length == 1)
                     return !exists("Perp", selected.flat);
-                }
                 return false;
             },
             function (e, k) {
                 return k == "p";
             },
             function () {
-                objects.add(new Perp(selected.get("PointBase")[0], selected.get("Line")[0]));
+                objects.add(new Perp(selected.get("PointBase")[0], selected.get("SegmentBase")[0]));
                 render();
             }
         )
@@ -505,14 +522,14 @@ document.addEventListener("keydown", function (e: KeyboardEvent) {
     var code = typeof e.which === "number" ? e.which : e.keyCode;
     var key = String.fromCharCode(code);
     key = key.toLowerCase();
-    var act = false;
-    buttons.forEach(function (o) {
-        if (!act && o.valid() && o.hotkey(e, key))
+    buttons.some(function (o) {
+        if (o.valid() && o.hotkey(e, key))
         {
             o.action();
             e.preventDefault();
-            act = true;
+            return true;
         }
+        return false;
     });
 }, false);
 

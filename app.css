@@ -12,7 +12,6 @@
 
 #buttons > div {
     display: none;
-    width: 100%;
     background-color: green;
     padding-left: 5%;
     padding-right: 5%;

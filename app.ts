@@ -239,18 +239,25 @@ class Perp extends LineBase {
 }
 
 class Midpoint extends PointBase {
-    constructor(public p1: PointBase, public p2: PointBase) {
+    constructor(public points: PointBase[]) {
         super();
-        this.dependsOn.push(p1, p2);
+        this.dependsOn = this.points;
     }
 
     getX() {
-        return (this.p1.getX() + this.p2.getX()) / 2;
+        let sumX = 0;
+        for (let point of this.points)
+            sumX += point.getX();
+        return sumX / this.points.length;
     }
 
     getY() {
-        return (this.p1.getY() + this.p2.getY()) / 2;
+        let sumY = 0;
+        for (let point of this.points)
+            sumY += point.getY();
+        return sumY / this.points.length;
     }
+
 }
 
 class Button {
@@ -441,7 +448,7 @@ window.onload = function () {
         ),
         new Button("midpoint",
             function () {
-                if (selected.flat.length == 2 && selected.get("PointBase").length == 2)
+                if (selected.flat.length >= 2 && selected.flat.length == selected.get("PointBase").length)
                     return !exists("Midpoint", selected.flat);
                 return false;
             },
@@ -449,7 +456,7 @@ window.onload = function () {
                 return k == "m" && e.ctrlKey;
             },
             function () {
-                objects.add(new Midpoint(selected.flat[0], selected.flat[1]));
+                objects.add(new Midpoint(selected.flat.slice()));
                 render();
             }
         ),

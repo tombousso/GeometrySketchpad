@@ -51,7 +51,6 @@ var Base = /** @class */ (function () {
         this.selected = false;
         this.dependsOn = [];
     }
-    Base.prototype.render = function () { };
     Base.prototype.distanceFrom = function (x, y) {
         return Number.MAX_VALUE;
     };
@@ -68,12 +67,6 @@ var PointBase = /** @class */ (function (_super) {
         ctx.arc(this.getX(), this.getY(), 7, 0, 2 * Math.PI, false);
         ctx.fill();
         ctx.closePath();
-    };
-    PointBase.prototype.getX = function () {
-        return NaN;
-    };
-    PointBase.prototype.getY = function () {
-        return NaN;
     };
     PointBase.prototype.distanceFrom = function (x, y) {
         var d = Math.sqrt(Math.pow(x - this.getX(), 2) + Math.pow(y - this.getY(), 2));
@@ -115,24 +108,6 @@ var SegmentBase = /** @class */ (function (_super) {
     function SegmentBase() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    SegmentBase.prototype.getX1 = function () {
-        return NaN;
-    };
-    SegmentBase.prototype.getY1 = function () {
-        return NaN;
-    };
-    SegmentBase.prototype.getX2 = function () {
-        return NaN;
-    };
-    SegmentBase.prototype.getY2 = function () {
-        return NaN;
-    };
-    SegmentBase.prototype.getSlopeX = function () {
-        return NaN;
-    };
-    SegmentBase.prototype.getSlopeY = function () {
-        return NaN;
-    };
     SegmentBase.prototype.vert = function () {
         return Math.abs(this.getSlopeX()) > 1;
     };

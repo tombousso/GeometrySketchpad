@@ -385,7 +385,9 @@ window.onload = function () {
                 return k == "r" && !e.ctrlKey;
             },
             function () {
-                selected.flat[0].name = prompt("New name:", selected.flat[0].name);
+                let newName = prompt("New name:", selected.flat[0].name);
+                if (newName)
+                    selected.flat[0].name = newName;
                 render();
             }
         ),

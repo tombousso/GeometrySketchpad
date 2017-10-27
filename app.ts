@@ -47,18 +47,18 @@ class Objects {
 var objects = new Objects();
 var selected = new Objects();
 
-class Base {
+abstract class Base {
     selected = false;
     dependsOn = [];
 
-    render() { }
+    abstract render();
 
     distanceFrom(x, y) {
         return Number.MAX_VALUE;
     }
 }
 
-class PointBase extends Base {
+abstract class PointBase extends Base {
     render() {
         ctx.fillStyle = this.selected ? 'red' : 'black';
         ctx.beginPath();
@@ -67,13 +67,9 @@ class PointBase extends Base {
         ctx.closePath();
     }
 
-    getX() {
-        return NaN;
-    }
+    abstract getX();
 
-    getY() {
-        return NaN;
-    }
+    abstract getY();
 
     distanceFrom(x, y) {
         var d = Math.sqrt(Math.pow(x - this.getX(), 2) + Math.pow(y - this.getY(), 2));
@@ -110,30 +106,18 @@ class Point extends PointBase {
     }
 }
 
-class SegmentBase extends Base {
-    getX1() {
-        return NaN;
-    }
+abstract class SegmentBase extends Base {
+    abstract getX1();
 
-    getY1() {
-        return NaN;
-    }
+    abstract getY1();
 
-    getX2() {
-        return NaN;
-    }
+    abstract getX2();
 
-    getY2() {
-        return NaN;
-    }
+    abstract getY2();
 
-    getSlopeX() {
-        return NaN;
-    }
+    abstract getSlopeX();
 
-    getSlopeY() {
-        return NaN;
-    }
+    abstract getSlopeY();
 
     vert() {
         return Math.abs(this.getSlopeX()) > 1;
@@ -185,7 +169,7 @@ class Segment extends SegmentBase {
     }
 }
 
-class LineBase extends SegmentBase {
+abstract class LineBase extends SegmentBase {
     constructor(public p1: PointBase) {
         super();
         this.dependsOn.push(p1);

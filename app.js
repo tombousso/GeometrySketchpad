@@ -1,12 +1,15 @@
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var canvas, ctx;
-
-var Objects = (function () {
+var Objects = /** @class */ (function () {
     function Objects() {
         this.removeAll();
     }
@@ -15,18 +18,17 @@ var Objects = (function () {
         while (p != null) {
             var k = p.constructor.name;
             if (k in this.o)
-                this.o[k].push(v); else
+                this.o[k].push(v);
+            else
                 this.o[k] = [v];
             p = p.__proto__;
         }
     };
-
     Objects.prototype.get = function (k) {
         if (k in this.o)
             return this.o[k];
         return [];
     };
-
     Objects.prototype.remove = function (v) {
         var p = v.__proto__;
         while (p != null) {
@@ -36,35 +38,29 @@ var Objects = (function () {
             p = p.__proto__;
         }
     };
-
     Objects.prototype.removeAll = function () {
         this.flat = [];
         this.o = { "Object": this.flat };
     };
     return Objects;
-})();
-
+}());
 var objects = new Objects();
 var selected = new Objects();
-
-var Base = (function () {
+var Base = /** @class */ (function () {
     function Base() {
         this.selected = false;
         this.dependsOn = [];
     }
-    Base.prototype.render = function () {
-    };
-
+    Base.prototype.render = function () { };
     Base.prototype.distanceFrom = function (x, y) {
         return Number.MAX_VALUE;
     };
     return Base;
-})();
-
-var PointBase = (function (_super) {
+}());
+var PointBase = /** @class */ (function (_super) {
     __extends(PointBase, _super);
     function PointBase() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     PointBase.prototype.render = function () {
         ctx.fillStyle = this.selected ? 'red' : 'black';
@@ -73,46 +69,39 @@ var PointBase = (function (_super) {
         ctx.fill();
         ctx.closePath();
     };
-
     PointBase.prototype.getX = function () {
         return NaN;
     };
-
     PointBase.prototype.getY = function () {
         return NaN;
     };
-
     PointBase.prototype.distanceFrom = function (x, y) {
         var d = Math.sqrt(Math.pow(x - this.getX(), 2) + Math.pow(y - this.getY(), 2));
         return Math.max(d - 15, 0);
     };
-
     PointBase.prototype.getSlopeX = function (p2) {
         return (this.getY() - p2.getY()) / (this.getX() - p2.getX());
     };
-
     PointBase.prototype.getSlopeY = function (p2) {
         return (this.getX() - p2.getX()) / (this.getY() - p2.getY());
     };
     return PointBase;
-})(Base);
-
-var Point = (function (_super) {
+}(Base));
+var Point = /** @class */ (function (_super) {
     __extends(Point, _super);
     function Point(x, y, name) {
-        _super.call(this);
-        this.x = x;
-        this.y = y;
-        this.name = name;
+        var _this = _super.call(this) || this;
+        _this.x = x;
+        _this.y = y;
+        _this.name = name;
+        return _this;
     }
     Point.prototype.getX = function () {
         return this.x;
     };
-
     Point.prototype.getY = function () {
         return this.y;
     };
-
     Point.prototype.render = function () {
         _super.prototype.render.call(this);
         ctx.fillStyle = this.selected ? 'green' : 'black';
@@ -120,41 +109,33 @@ var Point = (function (_super) {
         ctx.fillText(this.name, this.x + 5, this.y - 5);
     };
     return Point;
-})(PointBase);
-
-var SegmentBase = (function (_super) {
+}(PointBase));
+var SegmentBase = /** @class */ (function (_super) {
     __extends(SegmentBase, _super);
     function SegmentBase() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     SegmentBase.prototype.getX1 = function () {
         return NaN;
     };
-
     SegmentBase.prototype.getY1 = function () {
         return NaN;
     };
-
     SegmentBase.prototype.getX2 = function () {
         return NaN;
     };
-
     SegmentBase.prototype.getY2 = function () {
         return NaN;
     };
-
     SegmentBase.prototype.getSlopeX = function () {
         return NaN;
     };
-
     SegmentBase.prototype.getSlopeY = function () {
         return NaN;
     };
-
     SegmentBase.prototype.vert = function () {
         return Math.abs(this.getSlopeX()) > 1;
     };
-
     SegmentBase.prototype.render = function () {
         ctx.strokeStyle = this.selected ? 'blue' : 'black';
         ctx.lineWidth = 2;
@@ -164,127 +145,123 @@ var SegmentBase = (function (_super) {
         ctx.stroke();
         ctx.closePath();
     };
-
     SegmentBase.prototype.distanceFrom = function (x, y) {
         return distToSegment({ x: x, y: y }, { x: this.getX1(), y: this.getY1() }, { x: this.getX2(), y: this.getY2() });
     };
     return SegmentBase;
-})(Base);
-
-var Segment = (function (_super) {
+}(Base));
+var Segment = /** @class */ (function (_super) {
     __extends(Segment, _super);
     function Segment(p1, p2) {
-        _super.call(this);
-        this.p1 = p1;
-        this.p2 = p2;
-        this.dependsOn.push(p1, p2);
+        var _this = _super.call(this) || this;
+        _this.p1 = p1;
+        _this.p2 = p2;
+        _this.dependsOn.push(p1, p2);
+        return _this;
     }
     Segment.prototype.getX1 = function () {
         return this.p1.getX();
     };
-
     Segment.prototype.getY1 = function () {
         return this.p1.getY();
     };
-
     Segment.prototype.getX2 = function () {
         return this.p2.getX();
     };
-
     Segment.prototype.getY2 = function () {
         return this.p2.getY();
     };
-
     Segment.prototype.getSlopeX = function () {
         return this.p1.getSlopeX(this.p2);
     };
-
     Segment.prototype.getSlopeY = function () {
         return this.p1.getSlopeY(this.p2);
     };
     return Segment;
-})(SegmentBase);
-
-var LineBase = (function (_super) {
+}(SegmentBase));
+var LineBase = /** @class */ (function (_super) {
     __extends(LineBase, _super);
     function LineBase(p1) {
-        _super.call(this);
-        this.p1 = p1;
-        this.dependsOn.push(p1);
+        var _this = _super.call(this) || this;
+        _this.p1 = p1;
+        _this.dependsOn.push(p1);
+        return _this;
     }
     LineBase.prototype.getX1 = function () {
         return this.vert() ? this.p1.getX() + this.getSlopeY() * (0 - this.p1.getY()) : 0;
     };
-
     LineBase.prototype.getY1 = function () {
         return this.vert() ? 0 : this.p1.getY() + this.getSlopeX() * (0 - this.p1.getX());
     };
-
     LineBase.prototype.getX2 = function () {
         return this.vert() ? this.p1.getX() + this.getSlopeY() * (canvas.height - this.p1.getY()) : canvas.width;
     };
-
     LineBase.prototype.getY2 = function () {
         return this.vert() ? canvas.height : this.p1.getY() + this.getSlopeX() * (canvas.width - this.p1.getX());
     };
     return LineBase;
-})(SegmentBase);
-
-var Line = (function (_super) {
+}(SegmentBase));
+var Line = /** @class */ (function (_super) {
     __extends(Line, _super);
     function Line(p1, p2) {
-        _super.call(this, p1);
-        this.p1 = p1;
-        this.p2 = p2;
-        this.dependsOn.push(p2);
+        var _this = _super.call(this, p1) || this;
+        _this.p1 = p1;
+        _this.p2 = p2;
+        _this.dependsOn.push(p2);
+        return _this;
     }
     Line.prototype.getSlopeX = function () {
         return this.p1.getSlopeX(this.p2);
     };
-
     Line.prototype.getSlopeY = function () {
         return this.p1.getSlopeY(this.p2);
     };
     return Line;
-})(LineBase);
-
-var Perp = (function (_super) {
+}(LineBase));
+var Perp = /** @class */ (function (_super) {
     __extends(Perp, _super);
     function Perp(p1, s1) {
-        _super.call(this, p1);
-        this.p1 = p1;
-        this.s1 = s1;
-        this.dependsOn.push(s1);
+        var _this = _super.call(this, p1) || this;
+        _this.p1 = p1;
+        _this.s1 = s1;
+        _this.dependsOn.push(s1);
+        return _this;
     }
     Perp.prototype.getSlopeX = function () {
         return -this.s1.getSlopeY();
     };
-
     Perp.prototype.getSlopeY = function () {
         return -this.s1.getSlopeX();
     };
     return Perp;
-})(LineBase);
-
-var Midpoint = (function (_super) {
+}(LineBase));
+var Midpoint = /** @class */ (function (_super) {
     __extends(Midpoint, _super);
-    function Midpoint(p1, p2) {
-        _super.call(this);
-        this.p1 = p1;
-        this.p2 = p2;
-        this.dependsOn.push(p1, p2);
+    function Midpoint(points) {
+        var _this = _super.call(this) || this;
+        _this.points = points;
+        _this.dependsOn = _this.points;
+        return _this;
     }
     Midpoint.prototype.getX = function () {
-        return (this.p1.getX() + this.p2.getX()) / 2;
+        var sumX = 0;
+        for (var _i = 0, _a = this.points; _i < _a.length; _i++) {
+            var point = _a[_i];
+            sumX += point.getX();
+        }
+        return sumX / this.points.length;
     };
-
     Midpoint.prototype.getY = function () {
-        return (this.p1.getY() + this.p2.getY()) / 2;
+        var sumY = 0;
+        for (var _i = 0, _a = this.points; _i < _a.length; _i++) {
+            var point = _a[_i];
+            sumY += point.getY();
+        }
+        return sumY / this.points.length;
     };
     return Midpoint;
-})(PointBase);
-
-var Button = (function () {
+}(PointBase));
+var Button = /** @class */ (function () {
     function Button(id, valid, hotkey, action) {
         this.valid = valid;
         this.hotkey = hotkey;
@@ -293,11 +270,9 @@ var Button = (function () {
         this.el.onclick = action;
     }
     return Button;
-})();
-
+}());
 function render() {
     localStorage.setItem("letter", letter.toString());
-
     localStorage.setItem("objects", JSON.stringify(objects.flat.map(function (o) {
         var no = {};
         for (var k in o)
@@ -306,31 +281,26 @@ function render() {
             }
         return [o.__proto__.constructor.name, no];
     })));
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     var renderOrder = ["SegmentBase", "PointBase"];
     renderOrder.forEach(function (type) {
         objects.get(type).forEach(function (v, i) {
             v.render();
         });
     });
-
     buttons.forEach(function (o) {
         if (o.valid())
-            o.el.style.display = "block"; else
+            o.el.style.display = "block";
+        else
             o.el.style.display = "";
     });
 }
-
 function resize() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     render();
 }
-
 var buttons;
-
 function remove(os) {
     if (os.length == 0)
         return;
@@ -349,42 +319,37 @@ function remove(os) {
     });
     remove(toRemove);
 }
-
 function depends2i(dependsOn) {
     return dependsOn.map(function (o) {
         return objects.flat.indexOf(o);
     }).sort();
 }
-
 function exists(name, dependsOn) {
     var v = depends2i(dependsOn);
     return objects.get(name).some(function (o) {
         return JSON.stringify(depends2i(o.dependsOn)) == JSON.stringify(v);
     });
 }
-
 var mx, my;
 var letter = 65;
-
 function index(v) {
     if (v instanceof Base)
-        return { "index": objects.flat.indexOf(v) }; else if (v instanceof Array)
+        return { "index": objects.flat.indexOf(v) };
+    else if (v instanceof Array)
         v = v.map(index);
     return v;
 }
-
 function unindex(v) {
     if (v instanceof Object && "index" in v)
-        return objects.flat[v.index]; else if (v instanceof Array)
+        return objects.flat[v.index];
+    else if (v instanceof Array)
         v = v.map(unindex);
     return v;
 }
-
 window.onload = function () {
     var sletter = localStorage.getItem("letter");
     if (sletter)
         letter = parseInt(sletter);
-
     var saved = localStorage.getItem("objects");
     if (saved) {
         JSON.parse(saved).forEach(function (o) {
@@ -397,7 +362,6 @@ window.onload = function () {
                 selected.add(n);
         });
     }
-
     buttons = [
         new Button("renamepoint", function () {
             return selected.flat.length == 1 && selected.get("Point").length == 1;
@@ -449,13 +413,13 @@ window.onload = function () {
             render();
         }),
         new Button("midpoint", function () {
-            if (selected.flat.length == 2 && selected.get("PointBase").length == 2)
+            if (selected.flat.length >= 2 && selected.flat.length == selected.get("PointBase").length)
                 return !exists("Midpoint", selected.flat);
             return false;
         }, function (e, k) {
             return k == "m" && e.ctrlKey;
         }, function () {
-            objects.add(new Midpoint(selected.flat[0], selected.flat[1]));
+            objects.add(new Midpoint(selected.flat.slice()));
             render();
         }),
         new Button("line", function () {
@@ -479,7 +443,6 @@ window.onload = function () {
             render();
         })
     ];
-
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     resize();
@@ -495,10 +458,12 @@ window.onload = function () {
         });
         if (dMin < 25) {
             if (vMin.selected)
-                selected.remove(vMin); else
+                selected.remove(vMin);
+            else
                 selected.add(vMin);
             vMin.selected = !vMin.selected;
-        } else {
+        }
+        else {
             objects.add(new Point(ev.pageX, ev.pageY, String.fromCharCode(letter)));
             letter = letter == 90 ? 65 : letter + 1;
         }
@@ -509,7 +474,6 @@ window.onload = function () {
         my = ev.pageY;
     };
 };
-
 document.addEventListener("keydown", function (e) {
     var code = typeof e.which === "number" ? e.which : e.keyCode;
     var key = String.fromCharCode(code);
@@ -523,15 +487,9 @@ document.addEventListener("keydown", function (e) {
         return false;
     });
 }, false);
-
 window.onresize = resize;
-
-function sqr(x) {
-    return x * x;
-}
-function dist2(v, w) {
-    return sqr(v.x - w.x) + sqr(v.y - w.y);
-}
+function sqr(x) { return x * x; }
+function dist2(v, w) { return sqr(v.x - w.x) + sqr(v.y - w.y); }
 function distToSegmentSquared(p, v, w) {
     var l2 = dist2(v, w);
     if (l2 == 0)
@@ -543,6 +501,4 @@ function distToSegmentSquared(p, v, w) {
         y: v.y + t * (w.y - v.y)
     });
 }
-function distToSegment(p, v, w) {
-    return Math.sqrt(distToSegmentSquared(p, v, w));
-}
+function distToSegment(p, v, w) { return Math.sqrt(distToSegmentSquared(p, v, w)); }

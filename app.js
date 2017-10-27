@@ -366,7 +366,7 @@ window.onload = function () {
         new Button("renamepoint", function () {
             return selected.flat.length == 1 && selected.get("Point").length == 1;
         }, function (e, k) {
-            return k == "r";
+            return k == "r" && !e.ctrlKey;
         }, function () {
             selected.flat[0].name = prompt("New name:", selected.flat[0].name);
             render();

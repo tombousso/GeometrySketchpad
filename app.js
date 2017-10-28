@@ -399,6 +399,22 @@ window.onload = function () {
             objects.add(new Midpoint(selected.flat.slice()));
             render();
         }),
+        new Button("parents", function () {
+            return selected.flat.length === 1 && selected.flat[0].dependsOn.length > 0;
+        }, function (e, k) {
+            return k == "p";
+        }, function () {
+            for (var _i = 0, _a = selected.flat[0].dependsOn; _i < _a.length; _i++) {
+                var base = _a[_i];
+                selected.add(base);
+            }
+            selected.flat.forEach(function (o) {
+                o.selected = true;
+            });
+            selected.flat[0].selected = false;
+            selected.remove(selected.flat[0]);
+            render();
+        }),
         new Button("line", function () {
             if (selected.flat.length == 2 && selected.get("PointBase").length == 2)
                 return !exists("SegmentBase", selected.flat);

@@ -446,6 +446,26 @@ window.onload = function () {
                 render();
             }
         ),
+        new Button("parents",
+            function () {
+                return selected.flat.length === 1 && selected.flat[0].dependsOn.length > 0;
+            },
+            function (e, k) {
+                return k == "p";
+            },
+            function () {
+
+                for (let base of selected.flat[0].dependsOn)
+                    selected.add(base);
+                selected.flat.forEach(function (o: Base) {
+                    o.selected = true;
+                });
+
+                selected.flat[0].selected = false;
+                selected.remove(selected.flat[0]);
+                render();
+            }
+        ),
         new Button("line",
             function () {
                 if (selected.flat.length == 2 && selected.get("PointBase").length == 2)
